@@ -12,3 +12,14 @@ deploymentTarget = "static"
 [[ports]]
 localPort = 3000
 externalPort = 80
+
+[workflows]
+runButton = "Run"
+
+[[workflows.workflow]]
+name = "Run"
+author = 35189254
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd Backend && node index.js"
