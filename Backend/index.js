@@ -13,13 +13,14 @@ const PORT = 3000;
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use(express.static('../Frontend'));
 
 // Routes
-app.use("/auth", authRoutes);
-app.use("/user", userRoutes);
-app.use("/scan", scanRoutes);
-app.use("/credits", creditRoutes);
-app.use("/admin", adminRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/user", userRoutes);
+app.use("/api/scan", scanRoutes);
+app.use("/api/credits", creditRoutes);
+app.use("/api/admin", adminRoutes);
 
 // Global Error Handler
 app.use((err, req, res, next) => {
