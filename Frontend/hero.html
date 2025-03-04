@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/Hero.css">
+    <script defer src="/hero.js"></script>
+    <title>ScanSync</title>
+    <style>
+        /* General Reset */
+    * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+    }
+
+    /* Body Styling */
+    body {
+    background-color: #101820;
+    color: white;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    }
+
+    /* Navigation Bar */
+    .nav {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 30px;
+    background-color: #1e1e1e;
+    position: fixed;
+    top: 0;
+    left: 0;
+    }
+
+    .nav h4 {
+    font-size: 1.5rem;
+    }
+
+    .details {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    }
+
+    .details h5 {
+    font-size: 1rem;
+    }
+
+    .details a {
+    text-decoration: none;
+    color: #3696cc;
+    font-weight: bold;
+    }
+
+    .details a:hover {
+    text-decoration: underline;
+    }
+
+    /* Hero Section */
+    .hero {
+    margin-top: 100px;
+    text-align: center;
+    max-width: 600px;
+    }
+
+    .hero h1 {
+    font-size: 2rem;
+    margin-bottom: 15px;
+    }
+
+    .hero p {
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+    color: #bbb;
+    }
+
+    /* Upload Box */
+    .upload-box {
+    width: 100%;
+    padding: 20px;
+    border: 2px dashed #444;
+    background: #1e1e1e;
+    color: white;
+    text-align: center;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.3s;
+    }
+
+    .upload-box:hover {
+    background: #222;
+    }
+
+    .upload-box p {
+    font-size: 1rem;
+    }
+
+    /* Upload Button */
+    #uploadBtn {
+    margin-top: 20px;
+    padding: 12px 20px;
+    font-size: 1rem;
+    color: white;
+    background: #3696cc;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.3s;
+    }
+
+    #uploadBtn:hover {
+    background: #2b7ea8;
+    }
+
+    /* Matching Results */
+    #matchResults {
+    margin-top: 30px;
+    }
+
+    #matchResults h3 {
+    font-size: 1.3rem;
+    margin-bottom: 10px;
+    }
+
+    #matchList {
+    list-style-type: none;
+    padding: 0;
+    }
+
+    #matchList li {
+    background: #1e1e1e;
+    padding: 10px;
+    margin: 5px 0;
+    border-radius: 6px;
+    transition: 0.3s;
+    }
+
+    #matchList li:hover {
+    background: #333;
+    }
+
+    /* Footer */
+    footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    margin-top: 40px;
+    padding: 15px;
+    background: #1e1e1e;
+    width: 100%;
+    text-align: center;
+    position: fixed;
+    bottom: 0;
+    }
+
+    footer h4 {
+    font-size: 1rem;
+    margin-bottom: 5px;
+    }
+
+    footer a {
+    color: #3696cc;
+    text-decoration: none;
+    margin: 0 10px;
+    }
+
+    footer a:hover {
+    text-decoration: underline;
+    }
+
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <h4 id="username">User</h4>
+        <div class="details">
+            <h5>Credits: <span id="userCredits">0</span></h5>
+            <a href="#">Logout</a>
+        </div>
+    </nav>
+
+    <div class="hero">
+        <h1>Scan & Match Your Text Files</h1>
+        <p>Upload a text file, and our system will analyze and match it with existing documents.</p>
+
+        <div class="upload-box" id="dropzone">
+            <p>Drag & Drop or Click to Upload Text File</p>
+            <input type="file" id="fileInput" accept=".txt" style="display: none;">
+        </div>
+
+        <button id="uploadBtn">Upload & Scan</button>
+
+        <div id="matchResults">
+            <h3>Matching Documents:</h3>
+            <ul id="matchList"></ul>
+        </div>
+    </div>
+
+    <footer>
+        <h4>© Aerth Saraogi</h4>
+        <a href="https://www.linkedin.com/in/aerth-saraogi/">LinkedIn</a>
+        <a href="https://github.com/AerthSaraogi">GitHub</a>
+    </footer>
+    <script>
+        document.getElementById("signupForm").addEventListener("submit", async function(event) {
+            event.preventDefault();
+
+            const name = document.getElementById("name").value;
+            const email = document.getElementById("email").value;
+            const phone = document.getElementById("phone").value;
+            const country = document.getElementById("country").value;
+            const password = document.getElementById("password").value;
+
+            try {
+                const response = await fetch("/auth/register", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ name, email, phone, country, password })
+                });
+
+                const data = await response.json(); // Convert response to JSON
+
+                if (response.ok) {
+                    alert("Signup successful! Redirecting...");
+
+                    // Ensure a short delay before redirection
+                    setTimeout(() => {
+                        window.location.href = "hero.html"; 
+                    }, 1000);
+                } else {
+                    alert("Signup failed: " + data.error);
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                alert("Network error. Try again.");
+            }
+        });
+    </script>
+
+</body>
+</html>

@@ -1,30 +1,31 @@
+const sqlite3 = require("sqlite3").verbose();
 
-const sqlite3 = require('sqlite3').verbose();
-const path = require('path');
+const db = new sqlite3.Database("database.db", (err) => {
+    if (err) console.error("Database connection error:", err);
+    else console.log("Connected to SQLite database");
+});
 
-// Create a new database or connect to an existing one
-const dbPath = path.join(__dirname, 'database.sqlite');
-const db = new sqlite3.Database(dbPath, (err) => {
-  if (err) {
-    console.error('Error opening database', err.message);
-  } else {
-    console.log('Connected to the SQLite database');
-    
-    // Create tables
+// Create Tables
+db.serialize(() => {
     db.run(`CREATE TABLE IF NOT EXISTS users (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      username TEXT NOT NULL UNIQUE,
-      password TEXT NOT NULL,
-      email TEXT UNIQUE,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )`, (err) => {
-      if (err) {
-        console.error('Error creating users table', err.message);
-      } else {
-        console.log('Users table ready');
-      }
-    });
-  }
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT,
+        email TEXT UNIQUE,
+        phone TEXT,
+        country TEXT,
+        password TEXT,
+        credits INTEGER DEFAULT 20
+    )`);
+
+    db.run(`CREATE TABLE IF NOT EXISTS scans (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER,
+        document_name TEXT,
+        topic TEXT,
+        credits_used INTEGER,
+        timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY(user_id) REFERENCES users(id)
+    )`);
 });
 
 module.exports = db;
