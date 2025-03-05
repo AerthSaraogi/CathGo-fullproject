@@ -1,44 +1,33 @@
 const express = require("express");
 const cors = require("cors");
-const path = require("path");
+const db = require("./db");
 
 const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
+const adminRoutes = require("./routes/adminRoutes");
 const scanRoutes = require("./routes/scanRoutes");
 const creditRoutes = require("./routes/creditRoutes");
-const adminRoutes = require("./routes/adminRoutes");
 
 const app = express();
-const PORT = 3000; // No external dotenv, set manually
+const PORT = 3000;
 
-// ✅ Middleware
+// Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
-// ✅ Serve Static Files (Frontend)
-app.use(express.static(path.join(__dirname, "../Frontend")));
+// Routes
+app.use("/auth", authRoutes);
+app.use("/users", userRoutes);
+app.use("/admin", adminRoutes);
+app.use("/scan", scanRoutes);
+app.use("/credits", creditRoutes);
 
-// ✅ Routes
-app.use("/api/auth", authRoutes);
-app.use("/api/user", userRoutes);
-app.use("/api/scan", scanRoutes);
-app.use("/api/credits", creditRoutes);
-app.use("/api/admin", adminRoutes);
-
-// ✅ Global Error Handler
-app.use((err, req, res, next) => {
-    console.error("❌ Server Error:", err.stack);
-    res.status(500).json({ error: "Internal Server Error" });
+// Home Route
+app.get("/", (req, res) => {
+    res.send("Document Scanning and Matching System API is Running!");
 });
 
-// ✅ Start Server
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`))
-    .on("error", (err) => {
-        if (err.code === "EADDRINUSE") {
-            console.error(`❌ Port ${PORT} is already in use. Try a different port.`);
-            process.exit(1);
-        } else {
-            console.error("❌ Server failed to start:", err);
-        }
-    });
+// Start Server
+app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+});

@@ -1,42 +1,63 @@
 const express = require("express");
-const db = require("../database/db");
-
 const router = express.Router();
+const db = require("../db"); // Fixed path
 
-// GET all users (Admin)
-router.get("/admin/users", async (req, res) => {
-    try {
-        const users = await new Promise((resolve, reject) => {
-            db.all("SELECT id, name, email, phone, country, credits FROM users", (err, rows) => {
-                if (err) reject(err);
-                else resolve(rows);
-            });
-        });
+// Middleware to check if the user is an admin
+const verifyAdmin = (req, res, next) => {
+    const { email, password } = req.body;
 
-        res.json(users);
-    } catch (error) {
-        console.error("Error fetching users:", error);
-        res.status(500).json({ error: "Internal Server Error" });
-    }
+    db.get("SELECT * FROM users WHERE email = ? AND password = ? AND role = 'admin'", [email, password], (err, admin) => {
+        if (err) {
+            return res.status(500).json({ error: "Database error" });
+        }
+        if (!admin) {
+            return res.status(403).json({ error: "Unauthorized: Admin access required" });
+        }
+        req.admin = admin; // Store admin data for later use
+        next();
+    });
+};
+
+// Get all users (Admin only)
+router.get("/users", verifyAdmin, (req, res) => {
+    db.all("SELECT id, name, email, phone, country, credits FROM users WHERE role = 'user'", [], (err, rows) => {
+        if (err) {
+            return res.status(500).json({ error: "Database error" });
+        }
+        res.json(rows);
+    });
 });
 
-// POST Increase user credits (Admin)
-router.post("/admin/increase-credits/:userId", async (req, res) => {
-    const userId = req.params.userId;
+// Delete a user (Admin only)
+router.delete("/users/:id", verifyAdmin, (req, res) => {
+    const { id } = req.params;
+    db.run("DELETE FROM users WHERE id = ?", [id], function (err) {
+        if (err) {
+            return res.status(500).json({ error: "Database error" });
+        }
+        if (this.changes === 0) {
+            return res.status(404).json({ error: "User not found" });
+        }
+        res.json({ message: "User deleted successfully" });
+    });
+});
 
-    try {
-        await new Promise((resolve, reject) => {
-            db.run("UPDATE users SET credits = credits + 10 WHERE id = ?", [userId], function (err) {
-                if (err) reject(err);
-                else resolve();
-            });
+// Update user details & credits (Admin only)
+router.put("/users/:id", verifyAdmin, (req, res) => {
+    const { id } = req.params;
+    const { name, email, phone, country, credits } = req.body;
+
+    db.run("UPDATE users SET name = ?, email = ?, phone = ?, country = ?, credits = ? WHERE id = ?", 
+        [name, email, phone, country, credits, id], 
+        function (err) {
+            if (err) {
+                return res.status(500).json({ error: "Database error" });
+            }
+            if (this.changes === 0) {
+                return res.status(404).json({ error: "User not found" });
+            }
+            res.json({ message: "User updated successfully" });
         });
-
-        res.json({ message: "Credits increased successfully" });
-    } catch (error) {
-        console.error("Error updating credits:", error);
-        res.status(500).json({ error: "Failed to increase credits" });
-    }
 });
 
 module.exports = router;

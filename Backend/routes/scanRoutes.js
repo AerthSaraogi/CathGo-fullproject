@@ -1,58 +1,65 @@
 const express = require("express");
-const db = require("../database/db");
-
+const fs = require("fs");
+const path = require("path");
 const router = express.Router();
+const db = require("../db");
 
-// Upload Document for Scanning (Uses 1 Credit)
-router.post("/upload", (req, res) => {
-    const { userId, documentName, topic } = req.body;
+// Middleware to check if user has enough credits
+const checkCredits = (req, res, next) => {
+    const { userId } = req.body;
 
-    if (!userId || !documentName || !topic) {
-        return res.status(400).json({ error: "Missing required fields" });
+    db.get("SELECT credits FROM users WHERE id = ?", [userId], (err, row) => {
+        if (err) return res.status(500).json({ error: "Database error" });
+        if (!row) return res.status(404).json({ error: "User not found" });
+        if (row.credits <= 0) return res.status(403).json({ error: "Not enough credits" });
+
+        next(); // Proceed to scanning
+    });
+};
+
+// Function to match uploaded text with stored PDFs (basic implementation)
+const matchTextWithPDFs = (uploadedText) => {
+    const pdfDirectory = path.join(__dirname, "../pdfs");
+    const pdfFiles = fs.readdirSync(pdfDirectory);
+
+    for (const file of pdfFiles) {
+        const pdfPath = path.join(pdfDirectory, file);
+        const pdfText = fs.readFileSync(pdfPath, "utf8");
+
+        if (pdfText.includes(uploadedText)) {
+            return file; // Return matching PDF file name
+        }
+    }
+    return null; // No match found
+};
+
+// Scan route: Deduct 1 credit & perform matching
+router.post("/scan", checkCredits, (req, res) => {
+    const { userId, fileText } = req.body;
+
+    const matchedFile = matchTextWithPDFs(fileText);
+
+    if (!matchedFile) {
+        return res.json({ message: "No matching PDF found.", matchedFile: null });
     }
 
-    db.get("SELECT credits FROM users WHERE id = ?", [userId], (err, user) => {
-        if (err) return res.status(500).json({ error: err.message });
-        if (!user) return res.status(404).json({ error: "User not found" });
-        if (user.credits <= 0) return res.status(400).json({ error: "Insufficient credits" });
-
-        // Start a transaction to ensure atomicity
-        db.run("BEGIN TRANSACTION", (err) => {
-            if (err) return res.status(500).json({ error: err.message });
-
-            db.run(
-                "INSERT INTO scans (user_id, document_name, topic, credits_used) VALUES (?, ?, ?, 1)",
-                [userId, documentName, topic],
-                function (err) {
-                    if (err) {
-                        db.run("ROLLBACK"); // Revert changes if insert fails
-                        return res.status(500).json({ error: err.message });
-                    }
-
-                    db.run("UPDATE users SET credits = credits - 1 WHERE id = ?", [userId], (err) => {
-                        if (err) {
-                            db.run("ROLLBACK");
-                            return res.status(500).json({ error: err.message });
-                        }
-
-                        db.run("COMMIT", () => {
-                            res.json({ message: "Document uploaded successfully", scanId: this.lastID });
-                        });
-                    });
-                }
-            );
-        });
+    // Deduct 1 credit
+    db.run("UPDATE users SET credits = credits - 1 WHERE id = ?", [userId], (err) => {
+        if (err) return res.status(500).json({ error: "Database error" });
+        res.json({ message: "Scan successful. 1 credit deducted.", matchedFile });
     });
 });
 
-// Get Matching Documents
-router.get("/matches/:docId", (req, res) => {
-    const { docId } = req.params;
+// User requests more credits
+router.post("/request-credits", (req, res) => {
+    const { userId, requestAmount } = req.body;
 
-    if (!docId) return res.status(400).json({ error: "Document ID is required" });
-
-    // Fetch matching documents (Mock for now, replace with real logic)
-    res.json({ matches: [`Match1 for Doc ${docId}`, `Match2 for Doc ${docId}`] });
+    db.run("INSERT INTO credit_requests (user_id, amount, status) VALUES (?, ?, 'pending')", 
+        [userId, requestAmount], 
+        (err) => {
+            if (err) return res.status(500).json({ error: "Database error" });
+            res.json({ message: "Credit request sent to admin." });
+        });
 });
 
 module.exports = router;

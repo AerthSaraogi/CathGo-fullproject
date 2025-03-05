@@ -1,0 +1,32 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "name": "Aerth Saraogi",
+      "email": "aerthsaraogi9@gmail.com",
+      "phone": "9876545678",
+      "country": "India",
+      "password": "b9987b26e6e391d71829494de4ecbd64e315d91ef905bacb8e180f386f8fae6f",
+      "credits": 100
+    },
+    {
+      "id": 2,
+      "name": "Aerth Saraogi",
+      "email": "aerthsaraogi@gmail.com",
+      "phone": "9876545678",
+      "country": "India",
+      "password": "b9987b26e6e391d71829494de4ecbd64e315d91ef905bacb8e180f386f8fae6f",
+      "credits": 100
+    },
+    {
+      "id": 3,
+      "name": "ABC",
+      "email": "sudarshan.n@jisasoftech.com",
+      "phone": "9876545678",
+      "country": "India",
+      "password": "56580f2105550890f12570219343181f34c9859a62c26d296a998467dd48408c",
+      "credits": 100
+    }
+  ],
+  "scans": []
+}
