@@ -15,19 +15,21 @@ router.get("/:userId", (req, res) => {
 });
 // Get logged-in user details
 router.get("/me", (req, res) => {
-    const sessionId = req.headers.authorization; // Assuming session ID is sent in headers
+    const userId = req.query.userId; // ✅ Get from query parameter
 
-    if (!sessionId) {
+    if (!userId) {
         return res.status(401).json({ error: "Unauthorized" });
     }
 
-    db.get("SELECT id, name, email, phone, country, credits FROM users WHERE id = ?", [sessionId], (err, user) => {
+    db.get("SELECT id, name, email, phone, country, credits FROM users WHERE id = ?", [userId], (err, user) => {
         if (err) return res.status(500).json({ error: "Database error" });
         if (!user) return res.status(404).json({ error: "User not found" });
 
         res.json(user);
     });
 });
+
+
 
 // Update user profile
 router.put("/:userId", (req, res) => {
