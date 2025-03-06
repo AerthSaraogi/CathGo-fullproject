@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const db = require("../db"); // Fixed path
+const db = require("../database/db"); // Fixed path
 
 // Middleware to check if the user is an admin
 const verifyAdmin = (req, res, next) => {

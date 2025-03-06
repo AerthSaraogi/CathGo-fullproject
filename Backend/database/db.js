@@ -22,16 +22,20 @@ const createUsersTable = `CREATE TABLE IF NOT EXISTS users (
 db.run(createUsersTable, (err) => {
     if (err) {
         console.error('Error creating users table:', err.message);
-    }
-});
+    } else {
+        console.log('Users table created or already exists.');
 
-// Insert default admin if not exists (admin does not need credits)
-const insertAdmin = `INSERT OR IGNORE INTO users (id, name, email, phone, country, password, role, credits) VALUES 
-    (1, 'Admin', 'admin@example.com', '1234567890', 'USA', 'admin123', 'admin', 0);`;
+        // Insert default admin only after table creation is confirmed
+        const insertAdmin = `INSERT OR IGNORE INTO users (id, name, email, phone, country, password, role, credits) VALUES 
+            (1, 'Admin', 'admin@example.com', '1234567890', 'USA', 'admin123', 'admin', 0);`;
 
-db.run(insertAdmin, (err) => {
-    if (err) {
-        console.error('Error inserting admin:', err.message);
+        db.run(insertAdmin, (err) => {
+            if (err) {
+                console.error('Error inserting admin:', err.message);
+            } else {
+                console.log('Admin user inserted or already exists.');
+            }
+        });
     }
 });
 

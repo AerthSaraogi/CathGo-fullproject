@@ -81,7 +81,7 @@
             };
 
             try {
-                const response = await fetch("/login", { // ✅ Matches backend
+                const response = await fetch("http://localhost:3000/auth/login", { // ✅ Matches backend
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(loginData),

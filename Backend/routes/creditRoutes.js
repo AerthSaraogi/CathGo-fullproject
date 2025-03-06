@@ -1,5 +1,5 @@
 const express = require('express');
-const db = require('../db');
+const db = require('../database/db');
 const router = express.Router();
 
 // Middleware to check user credits before scanning

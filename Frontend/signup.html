@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel</title>
+    <title>Signup</title>
     <style>
-        /* General Reset */
         * {
             margin: 0;
             padding: 0;
@@ -13,7 +12,6 @@
             font-family: Arial, sans-serif;
         }
 
-        /* Body Styling */
         body {
             background-color: #101820;
             color: white;
@@ -24,141 +22,116 @@
             height: 100vh;
         }
 
-        /* Admin Panel Container */
-        .admin {
-            width: 90%;
-            max-width: 1000px;
+        .signup-container {
             background: #1e1e1e;
             padding: 20px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
             border-radius: 8px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
             text-align: center;
         }
 
-        /* Heading */
-        .admin h3 {
-            margin-bottom: 20px;
-            font-size: 1.8rem;
+        h2 {
             color: #3696cc;
+            margin-bottom: 15px;
         }
 
-        /* Table Styles */
-        table {
+        input, select {
             width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-            background: #222;
-            border-radius: 6px;
-            overflow: hidden;
-        }
-
-        th, td {
+            padding: 10px;
+            margin: 10px 0;
             border: 1px solid #444;
-            padding: 12px;
-            text-align: center;
-        }
-
-        th {
-            background-color: #3696cc;
+            border-radius: 5px;
+            background: #222;
             color: white;
             font-size: 1rem;
         }
 
-        td {
-            background-color: #1e1e1e;
-            color: white;
-        }
-
-        /* Button Styles */
         button {
+            width: 100%;
+            padding: 10px;
             background-color: #3696cc;
             color: white;
             border: none;
-            padding: 10px 15px;
             border-radius: 6px;
             cursor: pointer;
             transition: 0.3s;
-            font-size: 0.9rem;
+            font-size: 1rem;
         }
 
         button:hover {
             background-color: #2b7ea8;
         }
 
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            th, td {
-                padding: 8px;
-                font-size: 0.9rem;
-            }
+        p {
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+
+        a {
+            color: #3696cc;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
-    <div class="admin">
-        <h3>Admin Panel</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Phone</th>
-                    <th>Country</th>
-                    <th>Credits</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody id="userTable"></tbody>
-        </table>
+    <div class="signup-container">
+        <h2>Signup</h2>
+        <form id="signupForm">
+            <input type="text" id="name" placeholder="Full Name" required>
+            <input type="email" id="email" placeholder="Email" required>
+            <input type="text" id="phone" placeholder="Phone" required>
+            <input type="text" id="country" placeholder="Country" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <select id="role" required>
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+            </select>
+            <button type="submit">Sign Up</button>
+        </form>
+        <p>Already have an account? <a href="login.html">Login</a></p>
     </div>
 
     <script>
-        async function fetchUsers() {
-            try {
-                const response = await fetch("/api/admin/users");
-                if (!response.ok) throw new Error("Failed to fetch users");
+        document.getElementById("signupForm").addEventListener("submit", async function(event) {
+            event.preventDefault();
 
-                const users = await response.json();
-                const tableBody = document.getElementById("userTable");
-                tableBody.innerHTML = "";
+            const name = document.getElementById("name").value.trim();
+            const email = document.getElementById("email").value.trim();
+            const phone = document.getElementById("phone").value.trim();
+            const country = document.getElementById("country").value.trim();
+            const password = document.getElementById("password").value.trim();
+            const role = document.getElementById("role").value;
 
-                users.forEach(user => {
-                    const row = document.createElement("tr");
-                    row.innerHTML = `
-                        <td>${user.id}</td>
-                        <td>${user.name}</td>
-                        <td>${user.email}</td>
-                        <td>${user.phone}</td>
-                        <td>${user.country}</td>
-                        <td>${user.credits}</td>
-                        <td><button onclick="increaseCredits(${user.id})">+10 Credits</button></td>
-                    `;
-                    tableBody.appendChild(row);
-                });
-            } catch (error) {
-                console.error("Error fetching users:", error);
-                alert("Failed to load users.");
+            if (!name || !email || !phone || !country || !password) {
+                alert("All fields are required!");
+                return;
             }
-        }
 
-        async function increaseCredits(userId) {
             try {
-                const response = await fetch(`/api/admin/increase-credits/${userId}`, { method: "POST" });
+                const response = await fetch("http://localhost:3000/auth/register", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ name, email, phone, country, password, role })
+                });
 
                 if (response.ok) {
-                    alert("Credits increased!");
-                    fetchUsers(); // Refresh data
+                    alert("Signup successful! Redirecting to login...");
+                    window.location.href = "login.html";
                 } else {
-                    throw new Error("Failed to increase credits.");
+                    const error = await response.json();
+                    alert("Error: " + error.message);
                 }
             } catch (error) {
-                console.error("Error:", error);
-                alert(error.message);
+                console.error("Signup error:", error);
+                alert("Failed to sign up. Please try again.");
             }
-        }
-
-        fetchUsers(); // Load users on page load
+        });
     </script>
 </body>
 </html>

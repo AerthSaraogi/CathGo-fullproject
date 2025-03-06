@@ -2,7 +2,7 @@ const express = require("express");
 const fs = require("fs");
 const path = require("path");
 const router = express.Router();
-const db = require("../db");
+const db = require("../database/db");
 
 // Middleware to check if user has enough credits
 const checkCredits = (req, res, next) => {
