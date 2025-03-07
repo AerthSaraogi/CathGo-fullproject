@@ -1,7 +1,9 @@
 const { OpenAI } = require("openai");
 const db = require("../database/db");
+const dotenv= require("dotenv");
+config(dotenv());
 
-const openai = new OpenAI({ apiKey: "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" });
+const openai = new OpenAI({ apiKey: process.env.API_KEY });
 
 // Get embeddings for text
 async function getEmbedding(text) {
