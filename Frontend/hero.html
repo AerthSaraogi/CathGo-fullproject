@@ -211,8 +211,15 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", async function () {
+            const userId = localStorage.getItem("userId");
+            if (!userId) {
+                alert("Session expired. Please log in again.");
+                window.location.href = "login.html";
+                return;
+            }
+    
             try {
-                const response = await fetch("http://localhost:3000/users/me");
+                const response = await fetch(`http://localhost:3000/users/${userId}`);
                 const data = await response.json();
     
                 if (response.ok) {
@@ -220,6 +227,7 @@
                     document.getElementById("userCredits").textContent = data.credits;
                 } else {
                     alert("Session expired. Please log in again.");
+                    localStorage.removeItem("userId");
                     window.location.href = "login.html";
                 }
             } catch (error) {
@@ -251,7 +259,7 @@
                 formData.append("file", file);
     
                 try {
-                    const response = await fetch("/scan", {
+                    const response = await fetch("http://localhost:3000/scan", {
                         method: "POST",
                         body: formData
                     });
@@ -275,12 +283,13 @@
             });
     
             // Logout functionality
-            document.getElementById("logout").addEventListener("click", async function () {
-                await fetch("/api/logout", { method: "POST" });
+            document.getElementById("logout").addEventListener("click", function () {
+                localStorage.removeItem("userId");
                 window.location.href = "login.html";
             });
         });
     </script>
+    
     
 </body>
 </html>

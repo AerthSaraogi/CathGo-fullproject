@@ -64,39 +64,49 @@
             <input type="password" id="password" placeholder="Password" required>
             <button type="submit">Login</button>
         </form>
-        <p class="toggle" onclick="redirectToSignup()">Don't have an account? Sign Up</p>
+        <!-- <p class="toggle" onclick="redirectToSignup()">Don't have an account? Sign Up</p> -->
+        <p>Don't have an account?<a href="signup.html">Sign Up</a></p>
     </div>
 
     <script>
-        function redirectToSignup() {
-            window.location.href = "signup.html"; // Redirect to signup page
-        }
-
         document.getElementById("login-form").addEventListener("submit", async function (e) {
-            e.preventDefault();
+    e.preventDefault();
 
-            const loginData = {
-                email: document.getElementById("email").value,
-                password: document.getElementById("password").value,
-            };
+    const loginData = {
+        email: document.getElementById("email").value,
+        password: document.getElementById("password").value,
+    };
 
-            try {
-                const response = await fetch("http://localhost:3000/auth/login", { // ✅ Matches backend
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(loginData),
-                });
-
-                const data = await response.json();
-                alert(data.message);
-
-                if (response.ok) {
-                    window.location.href = data.redirect; // ✅ Redirects correctly
-                }
-            } catch (error) {
-                alert("Error connecting to server.");
-            }
+    try {
+        const response = await fetch("http://localhost:3000/auth/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(loginData),
         });
+
+        const data = await response.json();
+        alert(data.message);
+
+        if (response.ok) {
+            localStorage.setItem("userId", data.userId);
+            localStorage.setItem("role", data.role); // ✅ Store role
+
+            console.log(data.role);
+            console.log(data.userId);
+
+            // Redirect based on role
+            if (data.role === "admin") {
+                window.location.href = "admin.html"; // ✅ Redirect admins
+            } else {
+                window.location.href = "hero.html"; // ✅ Redirect users
+            }
+        }
+    } catch (error) {
+        alert("Error connecting to server.");
+    }
+});
+
     </script>
+    
 </body>
 </html>

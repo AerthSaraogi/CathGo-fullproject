@@ -41,12 +41,11 @@ router.post("/login", (req, res) => {
             return res.status(401).json({ error: "Invalid email or password" });
         }
 
-        // Redirect based on role
-        const redirectPage = user.role === "admin" ? "admin.html" : "hero.html";
-
-        res.json({ message: "Login successful", userId: user.id, redirect: redirectPage });
+        // Send role information to frontend
+        res.json({ message: "Login successful", userId: user.id, role: user.role });
     });
 });
+
 
 
 module.exports = router;
